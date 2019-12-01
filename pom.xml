@@ -42,7 +42,6 @@
 		<module>rezoom-oauth-server</module>
 		<module>rezoom-sender</module>
 		<module>rezoom-view</module>
-		<module>rezoom-ui</module>
 		<module>rezoom-extractor</module>
 	</modules>
 	<groupId>ReZooms</groupId>
