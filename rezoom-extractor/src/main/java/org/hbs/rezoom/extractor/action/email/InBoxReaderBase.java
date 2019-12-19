@@ -5,13 +5,13 @@ import java.util.Properties;
 
 import javax.mail.Authenticator;
 import javax.mail.Folder;
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.NoSuchProviderException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
 import javax.mail.UIDFolder;
-import javax.mail.internet.MimeMessage;
 
 import org.hbs.rezoom.bean.model.channel.ConfigurationEmail;
 import org.hbs.rezoom.event.service.GenericKafkaProducer;
@@ -19,7 +19,9 @@ import org.hbs.rezoom.extractor.action.core.InBoxReader;
 import org.hbs.rezoom.security.resource.IPath.EMedia;
 import org.hbs.rezoom.security.resource.IPath.ETopic;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
 
+@ComponentScan({ "org.hbs.rezoom.event.service" })
 public abstract class InBoxReaderBase implements InBoxReader
 {
 	private static final long	serialVersionUID	= 2428143934833300387L;
@@ -40,9 +42,9 @@ public abstract class InBoxReaderBase implements InBoxReader
 			Properties props = new Properties();
 
 			Map<String, String[]> map = config.getSource().props();
-			props.setProperty(map.get("Hostname")[0], config.getHostAddress().isEmpty() ? map.get("Hostname")[1] : config.getHostAddress());
-			props.setProperty(map.get("Port")[0], config.getPort().isEmpty() ? map.get("Port")[1] : config.getPort());
-			props.setProperty(map.get("Protocol")[0], config.getProtocol());
+			props.setProperty("mail.host", config.getHostAddress());
+			props.setProperty("mail.port", config.getPort());
+			props.setProperty("mail.store.protocol", config.getProtocol());
 
 			/* Get the Session object for specific Mail Property. */
 			Session session = Session.getInstance(props, new Authenticator() {
@@ -60,7 +62,10 @@ public abstract class InBoxReaderBase implements InBoxReader
 			Folder[] folderArr = store.getDefaultFolder().list();
 			for (Folder folder : folderArr)
 			{
-				System.out.println(config.getFromId().trim() + " Inbox Connected :: Unread Message Count :: " + folder.getUnreadMessageCount());
+				System.out.println(config.getFromId().trim() + " Inbox Connected :: Unread Message Count :: "+folder+" ---- " + folder.getUnreadMessageCount());
+				if (folder.getName().equalsIgnoreCase("inbox")) {
+					break;
+				}
 			}
 			return store;
 		}
@@ -69,11 +74,17 @@ public abstract class InBoxReaderBase implements InBoxReader
 		}
 	}
 
-	protected void pushToQueue(String producerId, UIDFolder _UIDFolder, MimeMessage[] messages) throws MessagingException
+	protected void pushToQueue(String producerId, UIDFolder _UIDFolder, Message[] messages) throws MessagingException
 	{
-		for (MimeMessage message : messages)
+		for (Message message : messages)
 		{
+			try {
+			//gKafkaProducer.sendMessage(ETopic.Attachment, EMedia.Email, "producerId : "+producerId+" UIDFolder : "+ _UIDFolder.toString()+" Message :"+ message.toString());
 			gKafkaProducer.sendMessage(ETopic.Attachment, EMedia.Email, new UIDMimeMessage(producerId, _UIDFolder, message));
+			}catch(Exception ex) {
+				ex.printStackTrace();
+				throw ex;
+			}
 		}
 	}
 

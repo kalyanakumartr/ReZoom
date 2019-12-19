@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 
 import org.hbs.rezoom.bean.model.IConfiguration;
 import org.hbs.rezoom.bean.model.channel.ConfigurationEmail;
+import org.hbs.rezoom.event.service.GenericKafkaProducer;
 import org.hbs.rezoom.extractor.action.core.InBoxReaderScheduler;
 import org.hbs.rezoom.extractor.bo.ExtractorBo;
 import org.hbs.rezoom.security.resource.IPath.EMedia;
@@ -25,6 +26,9 @@ public class InBoxReaderSchedulerEmail implements InBoxReaderScheduler
 
 	@Autowired
 	ExtractorBo					extractorBo;
+	
+	@Autowired
+	GenericKafkaProducer		gKafkaProducer;
 
 	@Override
 	@Scheduled(fixedDelayString = "${channel.email.delay}")
@@ -36,6 +40,7 @@ public class InBoxReaderSchedulerEmail implements InBoxReaderScheduler
 			{
 				isRunning = true;
 				List<IConfiguration> configList = extractorBo.getConfigurationList(EMedia.Email, EMediaMode.Internal);
+				System.out.println("gKafkaProducer :" +gKafkaProducer);
 				if (CommonValidator.isListFirstNotEmpty(configList))
 				{
 					ExecutorService executor = Executors.newFixedThreadPool(configList.size());
@@ -51,7 +56,7 @@ public class InBoxReaderSchedulerEmail implements InBoxReaderScheduler
 								try
 								{
 									System.out.println("Started By " + config.getFromId() + " at " + new Date());
-									InBoxReaderEmailFactory.getInstance().reader(config).readDataFromChannel(config);
+									InBoxReaderEmailFactory.getInstance().reader(config).readDataFromChannel(config,gKafkaProducer);
 								}
 								catch (Exception e)
 								{

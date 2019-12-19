@@ -1,5 +1,6 @@
 package org.hbs.rezoom.extractor.action.email;
 
+import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.UIDFolder;
 import javax.mail.internet.MimeMessage;
@@ -13,12 +14,12 @@ public class UIDMimeMessage extends AttachmentInfo
 
 	public String				producerId;
 	public String				uniqueId;
-	public MimeMessage			message;
+	public Message				message;
 
-	public UIDMimeMessage(String producerId, UIDFolder _UIDFolder, MimeMessage message) throws MessagingException
+	public UIDMimeMessage(String producerId, UIDFolder _UIDFolder, Message message) throws MessagingException
 	{
 		super();
-		this.uniqueId = _UIDFolder.getUID(message) + "";
+		//this.uniqueId = _UIDFolder.getUID(message) + "";
 		this.message = message;
 		this.producerId = producerId;
 	}

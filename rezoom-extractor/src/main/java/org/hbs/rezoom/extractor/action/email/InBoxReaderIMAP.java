@@ -15,6 +15,7 @@ import javax.mail.search.SearchTerm;
 
 import org.hbs.rezoom.bean.model.IConfiguration;
 import org.hbs.rezoom.bean.model.channel.ConfigurationEmail;
+import org.hbs.rezoom.event.service.GenericKafkaProducer;
 import org.hbs.rezoom.extractor.bo.ExtractorBo;
 import org.hbs.rezoom.util.CommonValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,11 +33,12 @@ public class InBoxReaderIMAP extends InBoxReaderBase
 	ExtractorBo					extractorBo;
 
 	@Override
-	public void readDataFromChannel(IConfiguration iConfig)
+	public void readDataFromChannel(IConfiguration iConfig, GenericKafkaProducer gKafkaProducer)
 	{
 		if (CommonValidator.isNotNullNotEmpty(iConfig))
 		{
 			ConfigurationEmail config = (ConfigurationEmail) iConfig;
+			this.gKafkaProducer=gKafkaProducer;
 			Store store = null;
 			IMAPFolder imapFolder = null;
 			try
@@ -133,7 +135,7 @@ public class InBoxReaderIMAP extends InBoxReaderBase
 		searchTerm = new AndTerm(searchTerm, minDateTerm);
 		searchTerm = new AndTerm(searchTerm, maxDateTerm);
 
-		pushToQueue(producerId, imapFolder, (MimeMessage[]) imapFolder.search(searchTerm));
+		pushToQueue(producerId, imapFolder, (Message[]) imapFolder.search(searchTerm));
 	}
 
 	@SuppressWarnings("serial")
