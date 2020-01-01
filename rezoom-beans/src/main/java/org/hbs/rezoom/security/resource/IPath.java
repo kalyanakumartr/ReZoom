@@ -174,6 +174,11 @@ public interface IPath extends IConstProperty
 		{
 			this.topic = topic;
 		}
+		
+		public String get()
+		{
+			return this.topic;
+		}
 	}
 
 	public static final String	USER_FULL_NAME				= "userFullName";
@@ -183,6 +188,10 @@ public interface IPath extends IConstProperty
 	public static final String	PRODUCER_ID					= "producerId";
 
 	public static final String	EMPLOYEE_ID					= "employeeId";
+	
+	public static final String	EMAIL						= "Email";
+	
+	public static final String	SMS							= "SMS";
 
 	public static final String	ACCEPT						= "accept";
 

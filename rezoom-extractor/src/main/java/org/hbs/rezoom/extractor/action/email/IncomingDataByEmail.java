@@ -43,7 +43,7 @@ public class IncomingDataByEmail implements IPath
 
 	private IncomingDao			incomingDao;
 
-	@KafkaListener(topicPartitions = @TopicPartition(topic = ATTACHMENT_TOPIC, partitions = { "0" }), groupId = EMPLOYEE_ID)
+	@KafkaListener(topicPartitions = @TopicPartition(topic = ATTACHMENT_TOPIC, partitions = { "0" }), groupId = EMPLOYEE_ID, clientIdPrefix = EMAIL)
 	public void consume(UIDMimeMessage uidMessage) throws IOException, MessagingException
 	{
 		logger.info(String.format("#### -> Consumed message -> %s", uidMessage.uniqueId));

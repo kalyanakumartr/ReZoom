@@ -20,14 +20,14 @@ public class GenericKafkaProducer implements IPath
 
 	public void sendMessage(ETopic eTopic, EMedia eMedia, ETemplate eTemplate, Object object)
 	{
-		this.kafkaTemplate.send(eTopic.name(), eMedia.ordinal(), eTemplate.name(), new Gson().toJson(object));
+		this.kafkaTemplate.send(eTopic.get(), eMedia.ordinal(), eTemplate.name(), new Gson().toJson(object));
 		logger.info("Send Message ::: " + eTemplate.name());
 	}
 
 	public void sendMessage(ETopic eTopic, EMedia eMedia, Object object)
 	{
-		this.kafkaTemplate.send(eTopic.name(), eMedia.ordinal(), eMedia.name(), object);
-		logger.info("Send Message ::: " + eTopic.name());
+		this.kafkaTemplate.send(eTopic.get(), eMedia.ordinal(), eMedia.name(), object);
+		logger.info("GenericKafkaProducer ::: >> Send Message ::: " + eTopic.name() + " --- " + object.toString());
 	}
 
 }

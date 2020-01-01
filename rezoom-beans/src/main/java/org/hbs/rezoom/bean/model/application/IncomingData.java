@@ -9,10 +9,14 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hbs.rezoom.bean.model.IProducers;
+import org.hbs.rezoom.bean.model.ProducersProperty;
 import org.hbs.rezoom.security.resource.IPath.EMedia;
 import org.hbs.rezoom.util.EBusinessKey;
 import org.hbs.rezoom.util.EnumInterface;
@@ -25,7 +29,7 @@ public class IncomingData implements ICRUDBean, EBusinessKey
 
 	public enum EIncomingStatus implements EnumInterface
 	{
-		New, InProcess, Completed, AttachmentReadError, InvalidAttachment, UnRecognizedError
+		New, Ready, InProcess, Completed, AttachmentReadError, InvalidAttachment, UnRecognizedError, Timeout
 	}
 
 	private static final long			serialVersionUID	= 8524114488133328911L;
@@ -40,6 +44,8 @@ public class IncomingData implements ICRUDBean, EBusinessKey
 	protected String					readerInstance;
 	protected EIncomingStatus			incomingStatus		= EIncomingStatus.New;
 	protected Set<ResumeAttachments>	attachmentList		= new LinkedHashSet<ResumeAttachments>();
+	protected IProducers				producer;
+	protected ProducersProperty			producerProperty;
 
 	public IncomingData()
 	{
@@ -115,6 +121,28 @@ public class IncomingData implements ICRUDBean, EBusinessKey
 	public String getUniqueId()
 	{
 		return uniqueId;
+	}
+	
+	@ManyToOne(targetEntity = CustomerProducer.class, fetch = FetchType.LAZY)
+	@JoinColumn(name = "producerId")
+	public IProducers getProducer()
+	{
+		return producer;
+	}
+
+	@ManyToOne(targetEntity = ProducersProperty.class, fetch = FetchType.LAZY)
+	@JoinColumn(name = "autoId")
+	public ProducersProperty getProducerProperty() {
+		return producerProperty;
+	}
+
+	public void setProducerProperty(ProducersProperty producerProperty) {
+		this.producerProperty = producerProperty;
+	}
+
+	public void setProducer(IProducers producer)
+	{
+		this.producer = producer;
 	}
 
 	public void setUniqueId(String uniqueId)

@@ -7,7 +7,6 @@ import javax.mail.FolderClosedException;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Store;
-import javax.mail.internet.MimeMessage;
 import javax.mail.search.AndTerm;
 import javax.mail.search.ComparisonTerm;
 import javax.mail.search.ReceivedDateTerm;
@@ -134,7 +133,7 @@ public class InBoxReaderIMAP extends InBoxReaderBase
 	{
 		searchTerm = new AndTerm(searchTerm, minDateTerm);
 		searchTerm = new AndTerm(searchTerm, maxDateTerm);
-
+ 
 		pushToQueue(producerId, imapFolder, (Message[]) imapFolder.search(searchTerm));
 	}
 
