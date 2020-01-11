@@ -106,7 +106,7 @@ public class InBoxReaderIMAP extends InBoxReaderBase
 				{
 					try
 					{
-						Thread.sleep(1000);
+						Thread.sleep(100000);
 					}
 					catch (InterruptedException ie)
 					{

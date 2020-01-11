@@ -12,11 +12,11 @@ public abstract class AttachmentInfo implements IConstProperty
 
 	private static final long	serialVersionUID	= -3434772327583545293L;
 
-	private String				fileFolderURL;
+	private String				fileFolderURL = "C:\\Users\\HP\\AttachmentPath\\";
 
 	private String				fileName;
 
-	private String				subFolderPath;
+	private String				subFolderPath="test";
 
 	public AttachmentInfo()
 	{
@@ -42,7 +42,7 @@ public abstract class AttachmentInfo implements IConstProperty
 			attFileDir.mkdirs();
 		}
 
-		return new FileOutputStream(attFileDir);
+		return new FileOutputStream(attFileDir+getFileName());
 	}
 
 	public String getOutputPath()

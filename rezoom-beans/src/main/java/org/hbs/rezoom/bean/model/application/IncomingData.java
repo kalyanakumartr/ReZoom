@@ -131,7 +131,7 @@ public class IncomingData implements ICRUDBean, EBusinessKey
 	}
 
 	@ManyToOne(targetEntity = ProducersProperty.class, fetch = FetchType.LAZY)
-	@JoinColumn(name = "autoId")
+	@JoinColumn(name = "propertyId")
 	public ProducersProperty getProducerProperty() {
 		return producerProperty;
 	}
