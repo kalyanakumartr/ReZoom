@@ -16,7 +16,7 @@ public abstract class AttachmentInfo implements IConstProperty
 
 	private String				fileName;
 
-	private String				subFolderPath="test";
+	private String				subFolderPath;
 
 	public AttachmentInfo()
 	{
@@ -55,7 +55,7 @@ public abstract class AttachmentInfo implements IConstProperty
 		return new File(getFileFolderURL() + getSubFolderPath() + getFileName());
 	}
 
-	private String getSubFolderPath()
+	public String getSubFolderPath()
 	{
 		return CommonValidator.isNotNullNotEmpty(subFolderPath) ? SLASH + subFolderPath : "";
 	}

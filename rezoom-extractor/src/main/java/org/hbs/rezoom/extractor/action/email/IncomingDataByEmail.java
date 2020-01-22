@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
@@ -21,11 +21,13 @@ import javax.mail.Part;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Store;
-import javax.mail.search.ReceivedDateTerm;
 import javax.mail.search.SearchTerm;
 
 import org.apache.commons.io.IOUtils;
+import org.hbs.rezoom.bean.model.IProducers;
+import org.hbs.rezoom.bean.model.Producers;
 import org.hbs.rezoom.bean.model.application.IncomingData;
+import org.hbs.rezoom.bean.model.application.IncomingData.EIncomingStatus;
 import org.hbs.rezoom.bean.model.application.ResumeAttachments;
 import org.hbs.rezoom.bean.model.application.ResumeAttachments.EResumeTrace;
 import org.hbs.rezoom.bean.model.channel.ConfigurationEmail;
@@ -35,6 +37,7 @@ import org.hbs.rezoom.security.resource.IPath;
 import org.hbs.rezoom.util.CommonValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.TopicPartition;
 import org.springframework.stereotype.Service;
@@ -48,7 +51,7 @@ public class IncomingDataByEmail implements IPath
 	private static final long	serialVersionUID	= -3529623337510779624L;
 
 	private final Logger		logger				= LoggerFactory.getLogger(IncomingDataByEmail.class);
-
+	@Autowired
 	private IncomingDao			incomingDao;
 
 	@KafkaListener(topicPartitions = @TopicPartition(topic = ATTACHMENT_TOPIC, partitions = { "0" }), groupId = EMPLOYEE_ID, clientIdPrefix = EMAIL)
@@ -126,9 +129,35 @@ public class IncomingDataByEmail implements IPath
 						return false;
 					}
 				};
-				Message[] messages = (Message[]) imapFolder.search(searchTerm);
+				//Message[] messages = (Message[]) imapFolder.search(searchTerm);
+				Message message= imapFolder.getMessage(kafkaEmailRef.messageNumber);
+				logger.info(message.getMessageNumber()+" -S- "+ kafkaEmailRef.messageNumber+"   -  "+kafkaEmailRef.sentDate+"  -   "+message.getSentDate());
 				
-				IncomingData incomingData = processMultiPart(new UIDMimeMessage(config.getProducerId(),imapFolder,messages[0]));
+				UIDMimeMessage uidMessage =new UIDMimeMessage(config.getProducerId(),imapFolder,message);
+				SimpleDateFormat DATE_FORMAT  = new SimpleDateFormat("yyyy-MM-dd");
+				SimpleDateFormat TIME_FORMAT  = new SimpleDateFormat("HHmmss");
+				
+				uidMessage.setSubFolderPath(config.getProducerId()+"\\"+config.getProducerId()+"\\"+DATE_FORMAT.format(message.getSentDate())+"\\"+TIME_FORMAT.format(message.getSentDate())+"\\");
+				
+				IncomingData incomingData = processMultiPart(uidMessage);
+				
+				if (CommonValidator.isNotNullNotEmpty(incomingData))
+				{
+					incomingData.setCandidateEmail(message.getFrom()[0].toString());
+					incomingData.setMedia(EMedia.Email);
+					incomingData.setIncomingStatus(EIncomingStatus.New);
+					incomingData.setSubject(message.getSubject());
+					incomingData.setSentTime(message.getSentDate().getTime());
+					incomingData.setUniqueId(imapFolder.getUID(message)+"");
+					incomingData.setReaderInstance(EMedia.Email.toString());
+					incomingData.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+					//incomingData.setProducerProperty(kafkaEmailRef.config.getProducerId());
+					IProducers producer = new Producers();
+					producer.setProducerId(config.getProducerId());
+					incomingData.setProducer(producer);
+					incomingDao.save(incomingData);
+					
+				}
 				logger.info(incomingData.getAttachmentList().toString());
 				
 			}
@@ -220,6 +249,7 @@ public class IncomingDataByEmail implements IPath
 		try
 		{
 			BodyPart bodyPart = null;
+			IncomingData incomingData = new IncomingData();
 			attachmentsSet = new HashSet<ResumeAttachments>();
 			Multipart multipart = (Multipart) uidMsg.message.getContent();
 			ResumeAttachments attachment = null;
@@ -250,6 +280,9 @@ public class IncomingDataByEmail implements IPath
 					attachment.setStatus(true);
 					attachment.setTrace(EResumeTrace.YetToTrace);
 					attachment.setUploadFileFolderURL(uidMsg.getOutputPath());
+					attachment.setUploadSubFolderPath(uidMsg.getSubFolderPath());
+					attachment.setIncomingData(incomingData);
+					attachment.setCreatedDate(new Timestamp(System.currentTimeMillis()));
 					File file = uidMsg.getOutputFile();// Don't Change Position
 
 					attachment.setUploadFileSize(file.length());
@@ -260,7 +293,7 @@ public class IncomingDataByEmail implements IPath
 				}
 
 			}
-			IncomingData incomingData = new IncomingData();
+			
 			incomingData.setAttachmentList(attachmentsSet);
 			return incomingData;
 		}

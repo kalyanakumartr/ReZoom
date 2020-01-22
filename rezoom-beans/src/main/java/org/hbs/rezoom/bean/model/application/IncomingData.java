@@ -1,5 +1,6 @@
 package org.hbs.rezoom.bean.model.application;
 
+import java.sql.Timestamp;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -46,6 +47,7 @@ public class IncomingData implements ICRUDBean, EBusinessKey
 	protected Set<ResumeAttachments>	attachmentList		= new LinkedHashSet<ResumeAttachments>();
 	protected IProducers				producer;
 	protected ProducersProperty			producerProperty;
+	protected Timestamp					createdDate;
 
 	public IncomingData()
 	{
@@ -53,7 +55,7 @@ public class IncomingData implements ICRUDBean, EBusinessKey
 		this.incomingId = getBusinessKey();
 	}
 
-	@OneToMany(targetEntity = ResumeAttachments.class, fetch = FetchType.LAZY, mappedBy = "incomingData")
+	@OneToMany(targetEntity = ResumeAttachments.class, fetch = FetchType.LAZY,cascade = { javax.persistence.CascadeType.ALL }, mappedBy = "incomingData")
 	public Set<ResumeAttachments> getAttachmentList()
 	{
 		return attachmentList;
@@ -135,6 +137,11 @@ public class IncomingData implements ICRUDBean, EBusinessKey
 	public ProducersProperty getProducerProperty() {
 		return producerProperty;
 	}
+	
+	@Column(name = "createdDate")
+	public Timestamp getCreatedDate() {
+		return createdDate;
+	}
 
 	public void setProducerProperty(ProducersProperty producerProperty) {
 		this.producerProperty = producerProperty;
@@ -193,6 +200,10 @@ public class IncomingData implements ICRUDBean, EBusinessKey
 	public void setIncomingId(String incomingId)
 	{
 		this.incomingId = incomingId;
+	}
+
+	public void setCreatedDate(Timestamp createdDate) {
+		this.createdDate = createdDate;
 	}
 
 }

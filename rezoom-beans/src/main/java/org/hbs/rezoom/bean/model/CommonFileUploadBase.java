@@ -23,7 +23,7 @@ public class CommonFileUploadBase extends CommonDateAndStatusFields implements I
 	protected String			uploadFileVirtualURL	= "javascript:void(0);";
 	protected MultipartFile		uploadMultiPartFile;
 	protected String			uploadResourceHandler	= EResource.Default.name();
-	protected String			uploadSubFolderPath;
+	protected String			uploadSubFolderPath		="test";
 
 	public CommonFileUploadBase()
 	{
@@ -108,7 +108,7 @@ public class CommonFileUploadBase extends CommonDateAndStatusFields implements I
 		return uploadResourceHandler;
 	}
 
-	@Transient
+	@Column(name = "uploadSubFolderPath")
 	public String getUploadSubFolderPath()
 	{
 		return uploadSubFolderPath;

@@ -8,11 +8,13 @@ import org.hbs.rezoom.bean.model.channel.ConfigurationEmail;
 import org.hbs.rezoom.bean.model.channel.ConfigurationSMS;
 import org.hbs.rezoom.bean.model.channel.ConfigurationWeb;
 import org.hbs.rezoom.bean.model.channel.DataExtractorPattern;
+import org.hbs.rezoom.dao.IncomingDao;
 import org.hbs.rezoom.dao.ProducerDao;
 import org.hbs.rezoom.dao.ProducerPropertyDao;
 import org.hbs.rezoom.security.resource.IPath.EMedia;
 import org.hbs.rezoom.security.resource.IPath.EMediaMode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.Gson;
@@ -27,7 +29,10 @@ public class ExtractorBoImpl implements ExtractorBo
 	ProducerDao					producerDao;
 	@Autowired
 	ProducerPropertyDao			producerPropertyDao;
-
+	@Autowired
+	IncomingDao					incomingDao;
+	
+	
 	@Override
 	public List<IConfiguration> getConfigurationList(EMedia eMedia, EMediaMode eMediaMode)
 	{
@@ -74,9 +79,11 @@ public class ExtractorBoImpl implements ExtractorBo
 	}
 
 	@Override
-	public long getLastEmailSentDate(String customerAccountMail)
+	public long getLastEmailSentDate(String producerId)
 	{
-		return 0;
+		List<Long> lastEmailSentDateList = incomingDao.getLastEmailSentDate(producerId, new PageRequest(0, 1)) ;
+		Long lastEmailSentDate = lastEmailSentDateList.size()>0?lastEmailSentDateList.get(0):0;
+		return lastEmailSentDate;//!=null && lastEmailSentDate.equals("")?Long.getLong(lastEmailSentDate):0;
 	}
 
 	@Override

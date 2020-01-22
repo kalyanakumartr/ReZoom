@@ -56,7 +56,7 @@ public class InBoxReaderSchedulerEmail implements InBoxReaderScheduler
 								try
 								{
 									System.out.println("Started By " + config.getFromId() + " at " + new Date());
-									InBoxReaderEmailFactory.getInstance().reader(config).readDataFromChannel(config,gKafkaProducer);
+									InBoxReaderEmailFactory.getInstance().reader(config).readDataFromChannel(config,gKafkaProducer,extractorBo);
 								}
 								catch (Exception e)
 								{
